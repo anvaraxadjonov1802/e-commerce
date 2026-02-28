@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django.contrib.postgres',
+
     #Custom APP
     'rest_framework',
     'rest_framework_simplejwt',

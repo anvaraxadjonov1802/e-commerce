@@ -8,7 +8,7 @@ python-dotenv
 #django-cors-headers
 
 # rasm/media bilan ishlasangiz
-#Pillow
+Pillow
 
 # production deploy uchun (gunicorn)
 #gunicorn

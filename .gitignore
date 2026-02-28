@@ -4,3 +4,7 @@ venv/
 db.sqlite3
 .env
 media/
+__pycache__/
+.DS_Store
+.idea/
+.vscode/
