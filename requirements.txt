@@ -1,0 +1,17 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+psycopg2-binary
+python-dotenv
+
+# tavsiya qilaman (frontend boshqa domen bo'lsa kerak bo'ladi)
+#django-cors-headers
+
+# rasm/media bilan ishlasangiz
+#Pillow
+
+# production deploy uchun (gunicorn)
+#gunicorn
+
+# static file serve (prod)
+#whitenoise
