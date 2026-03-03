@@ -1,6 +1,5 @@
 from django.contrib.postgres.search import TrigramSimilarity
 from rest_framework import generics
-from unicodedata import category
 
 from .models import Product, Category
 from .serializers import ProductSerializer, CategorySerializer
