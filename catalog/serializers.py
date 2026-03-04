@@ -3,15 +3,24 @@ from .models import ProductVariant, Product, ProductImage, Category
 
 
 class ProductVariantSerializer(serializers.ModelSerializer):
+    available = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductVariant
-        fields = [
+        fields = (
             "id",
             "sku",
             "attributes_text",
             "price_amount",
             "is_active",
-        ]
+            'available',
+        )
+
+
+    def get_available(self, obj):
+        if hasattr(obj, "stock") and obj.stock:
+            return obj.stock.on_hand - obj.stock.reserved
+        return 0
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -42,6 +51,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
         ]
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -50,4 +60,3 @@ class CategorySerializer(serializers.ModelSerializer):
             "name",
             "slug"
         )
-

@@ -13,7 +13,7 @@ class ProductListView(generics.ListAPIView):
             Product.objects
             .filter(is_active=True)
             .select_related('category')
-            .prefetch_related('variants', "images")
+            .prefetch_related('images', 'variants', 'variants__stock')
         )
         '''
         category_slug = self.request.query_params.get('category')
@@ -81,7 +81,7 @@ class ProductDetailView(generics.RetrieveAPIView):
             Product.objects
             .filter(is_active=True)
             .select_related('category')
-            .prefetch_related('variants')
+            .prefetch_related('images', 'variants', 'variants__stock')
         )
 
 

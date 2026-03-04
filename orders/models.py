@@ -82,12 +82,18 @@ class OrderItem(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            #snapshot copy
+
+        #snapshot copy
+        if not self.product_title:
             self.product_title = self.variant.product.title
+        if not self.sku:
             self.sku = self.variant.sku
+        if not self.attributes_text:
             self.attributes_text = self.variant.attributes_text
+        if self.unit_price_amount is None:
             self.unit_price_amount = self.variant.price_amount
+        if self.unit_discount_amount is None:
+            self.unit_discount_amount = 0
 
         self.total_amount = (self.unit_price_amount - self.unit_discount_amount) * self.quantity
         super().save(*args, **kwargs)
