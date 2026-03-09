@@ -12,7 +12,18 @@ class Order(models.Model):
         COMPLETED = 'completed', 'Completed'
         CANCELED = 'canceled', 'Canceled'
 
+    class PaymentMethod(models.TextChoices):
+        CASH = "cash", "Cash"
+        CARD_TRANSFER = "card_transfer", "Card Transfer"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CASH
+    )
+
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

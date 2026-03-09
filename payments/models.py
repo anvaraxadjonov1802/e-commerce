@@ -17,7 +17,18 @@ class Payment(models.Model):
         related_name="payments"
     )
 
-    provider = models.CharField(max_length=50)  # click / payme / etc
+    class PaymentMethod(models.TextChoices):
+        CASH = "cash", "Cash"
+        CARD_TRANSFER = "card_transfer", "Card Transfer"
+
+    method = models.CharField(
+        max_length=20,
+        choices=PaymentMethod.choices,
+        default=PaymentMethod.CASH
+    )
+
+    provider = models.CharField(max_length=50, default="manual")  # click / payme / etc
+
     transaction_id = models.CharField(max_length=255, unique=True)
 
     amount = models.PositiveBigIntegerField()
