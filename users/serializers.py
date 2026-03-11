@@ -21,21 +21,88 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-class TelegramAuthSerializer(serializers.Serializer):
+class TelegramCheckSerializer(serializers.Serializer):
     telegram_id = serializers.IntegerField()
-    full_name = serializers.CharField(required=False, allow_blank=True)
 
     def validate(self, data):
-        telegram_id = data['telegram_id']
+        telegram_id = data["telegram_id"]
 
-        user, created = User.objects.get_or_create(
-            telegram_id=telegram_id,
-            defaults={
-                'full_name': data.get('full_name', ""),
-            },
-        )
+        user = User.objects.filter(telegram_id=telegram_id).first()
 
-        data['user'] = user
-        data['created'] = created
+        data["user"] = user
+        data["registered"] = bool(user and user.phone)
+        data["needs_phone"] = not bool(user and user.phone)
+
         return data
 
+
+class TelegramBindSerializer(serializers.Serializer):
+    telegram_id = serializers.IntegerField()
+    phone = serializers.CharField(max_length=20)
+    full_name = serializers.CharField(required=False, allow_blank=True)
+
+    def validate_phone(self, value):
+        phone = value.replace(" ", "").replace("+", "")
+        return phone
+
+    def validate(self, data):
+        telegram_id = data["telegram_id"]
+        phone = data["phone"]
+        full_name = data.get("full_name", "")
+
+        # 1) telegram_id bilan user bormi?
+        user_by_tg = User.objects.filter(telegram_id=telegram_id).first()
+
+        # 2) phone bilan user bormi?
+        user_by_phone = User.objects.filter(phone=phone).first()
+
+        # conflict: tg boshqa userda, phone boshqa userda
+        if user_by_tg and user_by_phone and user_by_tg.id != user_by_phone.id:
+            raise serializers.ValidationError("Phone belongs to another account.")
+
+        # Case A: tg user bor
+        if user_by_tg:
+            if not user_by_tg.phone:
+                user_by_tg.phone = phone
+            if not user_by_tg.full_name and full_name:
+                user_by_tg.full_name = full_name
+            user_by_tg.save(update_fields=["phone", "full_name"])
+            data["user"] = user_by_tg
+            return data
+
+        # Case B: phone user bor, tg yo‘q
+        if user_by_phone:
+            if not user_by_phone.telegram_id:
+                user_by_phone.telegram_id = telegram_id
+            if not user_by_phone.full_name and full_name:
+                user_by_phone.full_name = full_name
+            user_by_phone.save(update_fields=["telegram_id", "full_name"])
+            data["user"] = user_by_phone
+            return data
+
+        # Case C: ikkalasi ham yo‘q — yangi user
+        user = User.objects.create_user(
+            phone=phone,
+            password=None,
+            telegram_id=telegram_id,
+            full_name=full_name,
+        )
+        data["user"] = user
+        return data
+
+
+class TelegramLoginSerializer(serializers.Serializer):
+    telegram_id = serializers.IntegerField()
+
+    def validate(self, data):
+        telegram_id = data["telegram_id"]
+
+        user = User.objects.filter(telegram_id=telegram_id).first()
+        if not user:
+            raise serializers.ValidationError("User not found")
+
+        if not user.phone:
+            raise serializers.ValidationError("Phone is required")
+
+        data["user"] = user
+        return data
